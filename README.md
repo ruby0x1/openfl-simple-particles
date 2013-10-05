@@ -7,15 +7,15 @@ A simple particle system for openfl.
 
 Usage : 
 
-	- Copy the particles/ folder into your source folder.
-	- Create a new particle system, 
-	- `var system : ParticleSystem = new ParticleSystem( new flash.geom.Point() );`
-	- Add an emitter 
-	- `system.add_emitter('smoke1', { particle_image : openfl.Assets.getBitmapData("assets/smoke.png") });`
-	- Start the system emitting
-	- `system.emit( duration_in_seconds ); //default is -1, infinite emit
-	- Add to the stage
-	- `addChild( system );`
+- Copy the particles/ folder into your source folder.
+- Create a new particle system, 
+- `var system : ParticleSystem = new ParticleSystem( new flash.geom.Point() );`
+- Add an emitter 
+- `system.add_emitter('smoke1', { particle_image : openfl.Assets.getBitmapData("assets/smoke.png") });`
+- Start the system emitting
+- `system.emit( duration_in_seconds ); //default is -1, infinite emit
+- Add to the stage
+- `addChild( system );`
 
 Known Issues :
 
