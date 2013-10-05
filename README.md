@@ -19,7 +19,7 @@ A simple particle system for [openfl](http://openfl.org).
 
 ##Emitter template values
 
-//Values that you can pass into the { } to the add_emitter function: 
+-Values that you can pass into the { } to the add_emitter function: 
 
     particle_image = BitmapData
 
@@ -51,8 +51,7 @@ A simple particle system for [openfl](http://openfl.org).
     start_color = new Color( 1,1,1,1 );
     end_color = new Color( 0,0,0,0 );
 
-// The random values are "delta" based, 
-// if start is 32 and random is 32, it will be between 32 and 64
+-The random values are "delta" based, if start is 32 and random is 32, it will be between 32 and 64
 
     rotation_random = 360.0;
     end_rotation_random = 360.0;
