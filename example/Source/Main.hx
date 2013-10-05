@@ -21,19 +21,17 @@ class Main extends Sprite {
 		
 		super();
 
-			//listen for events
-		addEventListener( flash.events.Event.ENTER_FRAME, onupdate );		
+			//listen for events		
 		stage.addEventListener( flash.events.MouseEvent.MOUSE_MOVE, onmousemove );
 		stage.addEventListener( flash.events.MouseEvent.MOUSE_DOWN, onmousedown );
 
-			//disallow large dt values 
-		enddt = haxe.Timer.stamp();
+		
 
 		var smoke1 = Assets.getBitmapData("assets/smoke.png");
 		var smoke2 = Assets.getBitmapData("assets/smoke2.png");
 				
 				//create particle system at the middle screen
-			system = new ParticleSystem(new Point(stage.stageWidth/2, stage.stageWidth/2));
+			system = new ParticleSystem(new Point(stage.stageWidth/2, stage.stageWidth/2) );
 				
 				//create an emitter. template is a dynamic with lots of options
 			system.add_emitter('smoke1', { particle_image : smoke1, emit_time:0.1, life:1 });
@@ -52,7 +50,7 @@ class Main extends Sprite {
 
 			//add to the stage
 		addChild(system);
-		
+
 	}
 		
 //Mouse
@@ -73,18 +71,7 @@ class Main extends Sprite {
 
 //Update
 
-	var dt : Float = 0.016;
-	var enddt : Float = 0;
 
-	function onupdate(e) {
-
-			//calculate the delta time
-		dt = haxe.Timer.stamp() - enddt;
-			//store the end of the frame time.
-		enddt = haxe.Timer.stamp();
-			//update the particle system
-		system.update(dt);
-
-	}
+	
 	
 }

@@ -13,12 +13,41 @@ class ParticleSystem extends Sprite {
     public var emitters : Map<String, ParticleEmitter>;
     public var pos : Point;
 
-    public function new( _pos:Point ) {
+    var dt : Float = 0.016;
+    var enddt : Float = 0;    
+
+    var fixed_timestep : Float = -1;    
+
+    public function new( _pos:Point, ?_fixed_timestep : Float = -1 ) {
+
         super();
+
         if(emitters == null) new Map<String, ParticleEmitter>();
+
         pos = _pos;
+        fixed_timestep = _fixed_timestep;
+
+        addEventListener( flash.events.Event.ENTER_FRAME, onupdate );
+
+            //disallow large dt values 
+        enddt = haxe.Timer.stamp();
 
     } //new
+
+    function onupdate(e) {
+
+        if(fixed_timestep == -1) {
+                //calculate the delta time
+            dt = haxe.Timer.stamp() - enddt;
+                //store the end of the frame time.
+            enddt = haxe.Timer.stamp();
+                //update the particle system
+            update(dt);
+        } else {
+            update(fixed_timestep);
+        }
+
+    }
 
     public function add_emitter(_name:String, _template:Dynamic) {
 
