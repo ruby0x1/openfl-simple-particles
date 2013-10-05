@@ -25,8 +25,6 @@ class Main extends Sprite {
         stage.addEventListener( flash.events.MouseEvent.MOUSE_MOVE, onmousemove );
         stage.addEventListener( flash.events.MouseEvent.MOUSE_DOWN, onmousedown );
 
-        
-
         var smoke1 = Assets.getBitmapData("assets/smoke.png");
         var smoke2 = Assets.getBitmapData("assets/smoke2.png");
                 

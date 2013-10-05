@@ -27,8 +27,7 @@ Click to toggle emission, move mouse to move system.
 
     particle_image = BitmapData
 
-    cache_size = 100; 					//sprites
-    max_particles = 100; 				//sprites
+    cache_size = 100; 					//max number of sprites
 
     emit_time = 0.1; 					//seconds
     emit_count = 1; 					//number of sprites at each emit_time
@@ -76,13 +75,10 @@ Click to toggle emission, move mouse to move system.
 ##Known Issues :
 
 - Supports color internally but does not apply it to the sprite (only alpha is applied atm)
-- Rotation needs some work, setting a start rotation and no end rotation means start -> end tween, if end is not set explicitly it should ignore
 
-##License and more :
+##License :
 
-- Ported more than once from some js file online (that I found years ago), I don't recall the exact source
-- Ported from original code more than once to diff js libraries, then to haxe and then to openfl
-- MIT license
+- MIT license (see LICENSE file for more)
 
 
 Feel free to pull request or post issues!

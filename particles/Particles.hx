@@ -174,7 +174,7 @@ class ParticleEmitter {
 //            
         (_template.cache_size != null) ? 
             cache_size = _template.cache_size : 
-            cache_size = 300;
+            cache_size = 100;
 
         (_template.emit_count != null) ? 
             emit_count = _template.emit_count : 
