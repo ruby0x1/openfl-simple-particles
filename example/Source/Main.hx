@@ -34,15 +34,14 @@ class Main extends Sprite {
             system = new ParticleSystem(new Point(stage.stageWidth/2, stage.stageWidth/2) );
                 
                 //create an emitter. template is a dynamic with lots of options
-            system.add_emitter('smoke1', { particle_image : smoke1, emit_time:0.1, life:1 });
-                //a second emitter, varying the smoke up
+            system.add_emitter('smoke1', { particle_image : smoke1, emit_time:0.05, life:2, emit_count:10,  pos_random:new Point(200,1) });
+
+                //a second emitter
             system.add_emitter('smoke2', { 
                 particle_image : smoke2, 
-                emit_time:1, 
-                gravity : new Point(0,-5),
-                rotation_random:0, 
-                end_rotation_random:0, 
-                end_size:new Point(256,256) 
+                emit_time:0.5, 
+                gravity : new Point(0,-10),
+                end_size:new Point(512,512) 
             });
 
                 //start emitting

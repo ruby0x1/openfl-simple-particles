@@ -4,7 +4,7 @@
 	<meta title="Particles" package="com.underscorediscovery.particles" version="1.0.0" company="underscorediscovery" />
 	<app main="Main" path="Export" file="Particles" />
 
-	<window fps="60" background="0x121212"/>
+	<window fps="30" background="0x121212"/>
 	
 	<source path="Source" />
 	<source path="../" />

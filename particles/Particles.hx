@@ -27,27 +27,12 @@ class ParticleSystem extends Sprite {
         pos = _pos;
         fixed_timestep = _fixed_timestep;
 
-        addEventListener( flash.events.Event.ENTER_FRAME, onupdate );
+        addEventListener( flash.events.Event.ENTER_FRAME, update );
 
             //disallow large dt values 
         enddt = haxe.Timer.stamp();
 
     } //new
-
-    function onupdate(e) {
-
-        if(fixed_timestep == -1) {
-                //calculate the delta time
-            dt = haxe.Timer.stamp() - enddt;
-                //store the end of the frame time.
-            enddt = haxe.Timer.stamp();
-                //update the particle system
-            update(dt);
-        } else {
-            update(fixed_timestep);
-        }
-
-    }
 
     public function add_emitter(_name:String, _template:Dynamic) {
 
@@ -80,10 +65,10 @@ class ParticleSystem extends Sprite {
         }        
     } //destroy
 
-    public function update(dt:Float) {
+    public function update(o) {
         if(!active) return;
         for(emitter in emitters) {
-            emitter.update(dt);
+            emitter.update();
         }
     } //update
 
@@ -94,18 +79,17 @@ class ParticleEmitter {
     public var particle_system : ParticleSystem;
 
     public var active : Bool = true;
-    public var max_particles : Int = 100;
     public var emit_count : Int = 1;
     public var active_particles : Array<Particle>;
 
-    public var particle_count : Int = 0;
     public var elapsed_time : Float = 0;
     public var duration : Float = -1;
-    public var emission_rate : Float = 0;
-    public var emit_counter : Float = 0;
+    public var emission_rate : Float = 0;    
     public var emit_next : Float = 0;
     public var emit_last : Float = 0;
     public var particle_index : Int = 0;
+
+    var emit_timer : Float = 0;
 
     public var particle_cache : Array<Sprite>;
     public var cache_size : Int = 100;
@@ -152,6 +136,10 @@ class ParticleEmitter {
     var direction_vector : Point;
     public var template : Dynamic = null;
 
+    var finish_time : Float = 0;
+
+    var has_end_rotation : Bool = false;
+
     public function new(_system:ParticleSystem, _template:Dynamic) {   
 
         template = _template;
@@ -160,12 +148,13 @@ class ParticleEmitter {
         active_particles = new Array<Particle>();
         particle_cache = new Array<Sprite>();
  
-        emit_counter = 0;
+        emit_timer = 0;
         emit_last = 0;
         emit_next = 0;
 
         _temp_speed = new Point();
-        _temp_direction = new Point();
+
+        to_remove = [];
             
             //apply defaults 
         apply(template);
@@ -185,11 +174,7 @@ class ParticleEmitter {
 //            
         (_template.cache_size != null) ? 
             cache_size = _template.cache_size : 
-            cache_size = 100;
-
-        (_template.max_particles != null) ? 
-            max_particles = _template.max_particles : 
-            max_particles = 100;
+            cache_size = 300;
 
         (_template.emit_count != null) ? 
             emit_count = _template.emit_count : 
@@ -228,9 +213,9 @@ class ParticleEmitter {
             rotation_random = _template.rotation_random : 
             rotation_random = 360;
 
-        (_template.end_rotation != null) ?
-            end_rotation = _template.end_rotation : 
-            end_rotation = 0;
+        (_template.end_rotation != null) 
+            ? { end_rotation = _template.end_rotation; has_end_rotation = true; } 
+            : { end_rotation = 0; }
 
         (_template.end_rotation_random != null) ?
             end_rotation_random = _template.end_rotation_random : 
@@ -259,7 +244,7 @@ class ParticleEmitter {
 
         (_template.gravity != null) ?
             gravity = _template.gravity : 
-            gravity = new Point(0,-3);
+            gravity = new Point(0,-80);
 
         (_template.start_size != null) ?
             start_size = _template.start_size : 
@@ -308,28 +293,29 @@ class ParticleEmitter {
         duration = t;
         active = true;
         emit_last = 0;
-        emit_counter = 0;
-        emit_next = 0;  
+        emit_timer = 0;
+        emit_next = 0;
+
+        enddt = haxe.Timer.stamp();
+
+        if(duration != -1) {
+            finish_time = haxe.Timer.stamp() + duration;
+        }
     } 
 
     public function stop() {
         active = false;
         elapsed_time = 0;
-        emit_counter = 0;
+        emit_timer = 0;
     }
 
     private function spawn() {
-        if(particle_count == max_particles) { return false; }
 
         var particle = new Particle(this);
+        
         init_particle( particle );
-        active_particles.push(particle);
-        // trace(active_particles.length);
-        // active_particles[ particle_count ] = particle;
-        particle_count++;
+        active_particles.push( particle );
 
-
-        return true;
     }
 
     private function random_1_to_1(){ return Math.random() * 2 - 1; }
@@ -343,13 +329,7 @@ class ParticleEmitter {
         return target;
     }
 
-    function point_add(target:Point, a:Point, b:Point ) : Point {
-        target.setTo( a.x+b.x, a.y+b.y );
-        return target;
-    }
-
     var _temp_speed : Point;
-    var _temp_direction : Point;
 
     private function init_particle( particle:Particle ) {
 
@@ -363,6 +343,9 @@ class ParticleEmitter {
             particle.sprite = particle_cache[cache_index];
             particle.sprite.visible = true;
 
+                //kill the oldest sprite, as we are now reworking our way up the cache
+            active_particles.shift();
+
         } else {
 
             var b = new Bitmap( particle_image );
@@ -374,19 +357,15 @@ class ParticleEmitter {
 
             particle_cache[cache_index] = particle.sprite;
         }
-        
+                    
+
+            //update the index we are inside the pool
         ++cache_index;
-        if(cache_index > cache_size - 1) {
+            //reset the index if we reach the max        
+        if(cache_index >= cache_size) {
             cache_index = 0;
         }
 
-        //core.echo(pool_index + ' / ' + poolsize);
-        
-        // if(particle.sprite.texture.name != particle_image) {
-            // particle.sprite.texture = phoenix.texture(particle_image);
-            // particle.sprite.srcrect = rect(0,0,particle.sprite.texture.width,particle.sprite.texture.height);           
-        // } 
-        
         if(direction != 0) {
             var new_dir = (direction + direction_random * random_1_to_1() ) * ( Math.PI / 180 ); // convert to radians
             direction_vector.setTo( Math.cos( new_dir ), Math.sin( new_dir ) ); 
@@ -395,9 +374,10 @@ class ParticleEmitter {
         }
 
         var _point_speed = speed + speed_random * random_1_to_1();
-        particle.speed.setTo(_point_speed, _point_speed);
+            particle.speed.setTo(_point_speed, _point_speed);
 
-        particle.direction = multiply_point( _temp_direction, direction_vector, particle.speed );        
+        particle.direction.x = direction_vector.x * particle.speed.x;
+        particle.direction.y = direction_vector.y * particle.speed.y;
 
         particle.start_size.x = start_size.x + (start_size_random.x * random_1_to_1());
         particle.start_size.y = start_size.y + (start_size_random.y * random_1_to_1());
@@ -431,8 +411,10 @@ class ParticleEmitter {
         particle.color_delta.b = ( _end_color.b - start_color.b ) / particle.time_to_live;
         particle.color_delta.a = ( _end_color.a - start_color.a ) / particle.time_to_live;
 
-        var _end_rotation = end_rotation + end_rotation_random * random_1_to_1();
-        particle.rotation_delta  = ( _end_rotation - particle.rotation ) / particle.time_to_live;
+        if(has_end_rotation) {
+            var _end_rotation = end_rotation + end_rotation_random * random_1_to_1();
+            particle.rotation_delta  = ( _end_rotation - particle.rotation ) / particle.time_to_live;
+        }
 
         //update sprite
         particle.sprite.width = particle.start_size.x;
@@ -446,44 +428,53 @@ class ParticleEmitter {
 
     } //init_particle
 
-    public function update( dt:Float ) {
+    var dt : Float = 0.016;
+    var enddt : Float = 0;
+    var to_remove : Array<Particle>; 
+
+    public function update() {
+
+        dt = haxe.Timer.stamp() - enddt;
+        enddt = haxe.Timer.stamp();
 
         if( active ) { // && emission_rate > 0            
 
-            emit_counter += dt;
+            emit_timer = haxe.Timer.stamp();
 
-            if( emit_counter > emit_next ) {                
-                emit_next = emit_counter + emit_time; 
-                emit_last = emit_counter;
+            if( emit_timer > emit_next ) {                
+                emit_next = emit_timer + emit_time; 
+                emit_last = emit_timer;
                 for(i in 0 ... emit_count) {
                     spawn();
                 }
             }
 
-            elapsed_time += dt;
-
-            if( duration != -1 && duration < elapsed_time ){
-                stop();          
+            if( duration != -1 && finish_time > emit_timer ){
+                stop();
             }
 
         } //if active and still emitting
 
-        particle_index = 0;
-        while( particle_index < particle_count ) {
+        var gravity_x = gravity.x * dt;
+        var gravity_y = gravity.y * dt;
 
-            var current_particle = active_particles[ particle_index ];
+            //update all active particles
+        for(current_particle in active_particles) {
 
-            // If the current particle is alive then update it
+                //die over time
+            current_particle.time_to_live -= dt;
+
+                // If the current particle is alive 
             if( current_particle.time_to_live > 0 ) {
 
-                current_particle.direction.x += gravity.x * dt;
-                current_particle.direction.y += gravity.y * dt;
+                    //start with gravity direction
+                current_particle.move_direction.x = gravity_x + current_particle.direction.x;
+                current_particle.move_direction.y = gravity_y + current_particle.direction.y;
+                    //then add that to the position
+                current_particle.position.x = current_particle.position.x + current_particle.move_direction.x;
+                current_particle.position.y = current_particle.position.y + current_particle.move_direction.y;
 
-                current_particle.position = point_add( current_particle.position, current_particle.position, current_particle.direction );
-
-                current_particle.time_to_live -= dt;
-
-                // Update colours based on delta
+                    // update colours based on delta
                 var r = current_particle.color.r += ( current_particle.color_delta.r * dt );
                 var g = current_particle.color.g += ( current_particle.color_delta.g * dt );
                 var b = current_particle.color.b += ( current_particle.color_delta.b * dt );
@@ -491,64 +482,52 @@ class ParticleEmitter {
 
                 var xx = current_particle.size.x += ( current_particle.size_delta.x * dt );
                 var yy = current_particle.size.y += ( current_particle.size_delta.y * dt );
-                
                 var rr = current_particle.rotation += ( current_particle.rotation_delta * dt );
 
-                if(r < 0) r = 0;
-                if(r > 1) r = 1;                
-                if(g < 0) g = 0;
-                if(g > 1) g = 1;                
-                if(b < 0) b = 0;
-                if(b > 1) b = 1;
-                if(a < 0) a = 0;
-                if(a > 1) a = 1;
+                    //clamp colors
+                if(r < 0) { r = 0; } if(g < 0) { g = 0; } if(b < 0) { b = 0; } if(a < 0) { a = 0; }
+                if(r > 1) { r = 1; } if(g > 1) { g = 1; } if(b > 1) { b = 1; } if(a > 1) { a = 1; }
 
                 current_particle.draw_color.set( r,g,b,a );
-                current_particle.draw_size.setTo( xx, yy);
-                
-                particle_index++;
+                current_particle.draw_size.setTo( xx, yy );
 
             } else {
 
-                // Replace particle with the last active 
-                // if( particle_index != particle_count - 1 ) {
-                //     active_particles[ particle_index ] = active_particles[ particle_count-1 ];
-                // }
-                active_particles.remove(current_particle);
+                to_remove.push(current_particle);                
                 current_particle.sprite.visible = false;
-                current_particle = null;
-                particle_count--;
+
             }
 
-        } //while
+                //now transfer the updated info to the visuals
+            current_particle.sprite.x = current_particle.position.x;
+            current_particle.sprite.y = current_particle.position.y;
+            current_particle.sprite.width = current_particle.draw_size.x;
+            current_particle.sprite.height = current_particle.draw_size.y;
+            current_particle.sprite.rotation = current_particle.rotation;
+            current_particle.sprite.alpha = current_particle.draw_color.a;
+                //todo, color filter?
+            // current_particle.sprite.color = particle.draw_color; 
 
-        if(particle_count <= 0 ) {
-            //callback for complete
-            // if(onStop) {
-                // onStop();
-            // }
+        } //for each active particle
+
+            //remove the dead ones
+        for(_particle in to_remove) {
+            active_particles.remove(_particle);
         }
 
-        for( i in 0 ... particle_count ) {
+            //clean up the dead list
+        to_remove.splice(0,to_remove.length);
 
-            var particle = active_particles[ i ];
+            //todo
+        // if(active_particles.length == 0 ) {
+        //     if(oncomplete) {
+        //         oncomplete();
+        //     }
+        // }
 
-            // var x = Math.floor( particle.position.x );
-            // var y = Math.floor( particle.position.y );
+    } //update
 
-            particle.sprite.x = particle.position.x;
-            particle.sprite.y = particle.position.y;
-            particle.sprite.width = particle.draw_size.x;
-            particle.sprite.height = particle.draw_size.y;
-            // particle.sprite.color = particle.draw_color; todo, color filter?
-            particle.sprite.alpha = particle.draw_color.a;
-            particle.sprite.rotation = particle.rotation;
-
-        }     
-    }
-
-
-}
+} //ParticleEmitter
 
 class Particle {
 
@@ -561,6 +540,7 @@ class Particle {
     public var size : Point;
     public var position : Point;
     public var direction : Point;
+    public var move_direction : Point;
     public var speed : Point;
     public var time_to_live : Float = 0;
     public var rotation : Float = 0;
@@ -581,6 +561,8 @@ class Particle {
         particle_system = e.particle_system;
         
         direction = new Point();
+        move_direction = new Point();
+
         speed = new Point();
         size = new Point();
         position = new Point();
