@@ -27,6 +27,8 @@ Click to toggle emission, move mouse to move system.
 
     particle_image = BitmapData
 
+    cache_size = 100; 					//sprites
+    
     emit_time = 0.1; 					//seconds
 
     life = 1.0;							//seconds
