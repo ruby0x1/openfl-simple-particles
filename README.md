@@ -13,7 +13,7 @@ Usage :
 - Add an emitter 
 - `system.add_emitter('smoke1', { particle_image : openfl.Assets.getBitmapData("assets/smoke.png") });`
 - Start the system emitting
-- `system.emit( duration_in_seconds ); //default is -1, infinite emit
+- `system.emit( duration_in_seconds ); //default is -1, infinite emit`
 - Add to the stage
 - `addChild( system );`
 
