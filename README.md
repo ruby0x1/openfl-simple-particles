@@ -8,7 +8,10 @@ Click to toggle emission, move mouse to move system.
 
 ##Usage : 
 
-- Copy the particles/ folder into your source folder.
+- Copy the particles/ folder into your source folder. **OR**
+- haxelib git this repository 
+- Will add to haxelib when more tested
+
 - Create a new particle system, 
 - `var system : ParticleSystem = new ParticleSystem( new flash.geom.Point() );`
 - Add an emitter 
