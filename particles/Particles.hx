@@ -95,6 +95,7 @@ class ParticleEmitter {
 
     public var active : Bool = true;
     public var max_particles : Int = 100;
+    public var emit_count : Int = 1;
     public var active_particles : Array<Particle>;
 
     public var particle_count : Int = 0;
@@ -185,6 +186,14 @@ class ParticleEmitter {
         (_template.cache_size != null) ? 
             cache_size = _template.cache_size : 
             cache_size = 100;
+
+        (_template.max_particles != null) ? 
+            max_particles = _template.max_particles : 
+            max_particles = 100;
+
+        (_template.emit_count != null) ? 
+            emit_count = _template.emit_count : 
+            emit_count = 1;
 
         (_template.direction != null) ? 
             direction = _template.direction : 
@@ -446,7 +455,9 @@ class ParticleEmitter {
             if( emit_counter > emit_next ) {                
                 emit_next = emit_counter + emit_time; 
                 emit_last = emit_counter;
-                spawn();
+                for(i in 0 ... emit_count) {
+                    spawn();
+                }
             }
 
             elapsed_time += dt;

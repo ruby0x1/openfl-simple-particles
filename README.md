@@ -28,8 +28,10 @@ Click to toggle emission, move mouse to move system.
     particle_image = BitmapData
 
     cache_size = 100; 					//sprites
-    
+    max_particles = 100; 				//sprites
+
     emit_time = 0.1; 					//seconds
+    emit_count = 1; 					//number of sprites at each emit_time
 
     life = 1.0;							//seconds
     life_random = 0.0;
