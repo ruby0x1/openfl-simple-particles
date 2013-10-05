@@ -3,7 +3,8 @@ openfl-simple-particles
 
 A simple particle system for [openfl](http://openfl.org).
 
-[ 1.0.0 Demo ](http://underscorediscovery.com/sven/openfl-simple-particles/)
+[ 1.0.0 Demo ](http://underscorediscovery.com/sven/openfl-simple-particles/) 
+Click to toggle emission, move mouse to move system.
 
 ##Usage : 
 
