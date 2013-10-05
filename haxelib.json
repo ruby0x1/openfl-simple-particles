@@ -1,0 +1,13 @@
+{
+  "name": "openfl-simple-particles",
+  "url": "http://github.com/underscorediscovery/openfl-simple-particles.git",
+  "license": "MIT",
+  "tags": [],
+  "description": "A simple particle system for openfl",
+  "version": "1.0.0",
+  "releasenote": "Initial commit",
+  "contributors": ["Sven Bergström"],
+  "dependencies": {
+      
+  }
+}

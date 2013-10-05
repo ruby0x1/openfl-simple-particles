@@ -52,6 +52,7 @@ class Main extends Sprite {
 
 			//add to the stage
 		addChild(system);
+		
 	}
 		
 //Mouse
