@@ -181,6 +181,11 @@ class ParticleEmitter {
             emit_time = _template.emit_time : 
             emit_time = 0.1;
 
+//            
+        (_template.cache_size != null) ? 
+            cache_size = _template.cache_size : 
+            cache_size = 100;
+
         (_template.direction != null) ? 
             direction = _template.direction : 
             direction = 0;
