@@ -9,7 +9,7 @@ import flash.geom.Point;
 
 class ParticleSystem extends Sprite {
 
-    public var active : Bool = true;
+    public var active : Bool = false;
     public var emitters : Map<String, ParticleEmitter>;
     public var pos : Point;
 
