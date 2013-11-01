@@ -1,4 +1,3 @@
-
 package particles;
 
 import flash.display.Bitmap;
@@ -344,7 +343,7 @@ class ParticleEmitter {
             particle.sprite.visible = true;
 
                 //kill the oldest sprite, as we are now reworking our way up the cache
-            active_particles.shift();
+            active_particles.shift().sprite.visible = false;
 
         } else {
 
