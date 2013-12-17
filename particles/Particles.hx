@@ -448,7 +448,7 @@ class ParticleEmitter {
                 }
             }
 
-            if( duration != -1 && finish_time > emit_timer ){
+            if( duration != -1 && emit_timer > finish_time ){
                 stop();
             }
 
