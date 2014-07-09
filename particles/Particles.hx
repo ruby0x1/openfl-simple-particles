@@ -343,8 +343,11 @@ class ParticleEmitter {
             particle.sprite.visible = true;
 
                 //kill the oldest sprite, as we are now reworking our way up the cache
-            active_particles.shift().sprite.visible = false;
-
+            var p:Particle = active_particles.shift();
+            if(p != null) {
+                p.sprite.visible = false;
+            }
+        
         } else {
 
             var b = new Bitmap( particle_image );
